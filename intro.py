@@ -89,6 +89,100 @@ def compare_plot(X,y,X_resampled,y_resampled, method):
     #plt.tight_layout(pad=3)
     return plt.show()
   
+
+# --------------------------------------------------------------------	
+# Compare SMOTE to original data
+
+# Print the value_counts on the original labels y
+print(pd.value_counts(pd.Series(y)))
+
+# Print the value_counts
+print(pd.value_counts(pd.Series(y_resampled)))
+
+# Run compare_plot
+compare_plot(X, y, X_resampled, y_resampled, method='SMOTE')
+
+# --------------------------------------------------------------------
+# Machine Learning - Linear Regression 
+
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+# Step 1: split your features and labels into train and test data 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+# Step 2: Define which model you want to use 
+model = LinearRegression()
+# Step 3: Fit the model to your training data 
+model.fit(X_train, y_train)
+# Step 4: Obtain model predictions from your test data
+y_predicted = model.predict(X_test)
+# Step 5: Compare y_test to predictions and obtain performance metrics
+print (metrics.r2_score(y_test, y_predicted))
+
+# --------------------------------------------
+# Exploring the traditional way
+
+# Get the mean for each group
+df.groupby('Class').mean()
+
+# Implement a rule for stating which cases are flagged as fraud
+df['flag_as_fraud'] = np.where(np.logical_and(df.V1 < -3 , df.V3 < -5), 1, 0)
+
+# Create a crosstab of flagged fraud cases versus the actual fraud cases
+print(pd.crosstab(df.Class, df.flag_as_fraud, rownames=['Actual Fraud'], colnames=['Flagged Fraud']))
+
+# -----------------------------------
+# Using ML classification - Logistic Regression 
+
+# Create the training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+# Fit a logistic regression model to our data
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Obtain model predictions
+predicted = model.predict(X_test)
+
+# Print the classifcation report and confusion matrix
+print('Classification report:\n', classification_report(y_test, predicted))
+conf_mat = confusion_matrix(y_true=y_test, y_pred=predicted)
+print('Confusion matrix:\n', conf_mat)
+
+# -----------------------------------------------------
+# Logistic regression combined with SMOTE ( Oversampling of the fraud cases )
+
+# This is the pipeline module we need for this from imblearn
+from imblearn.pipeline import Pipeline 
+
+# Define which resampling method and which ML model to use in the pipeline
+resampling = SMOTE(kind='borderline2')
+model = LogisticRegression()
+
+# Define the pipeline, tell it to combine SMOTE with the Logistic Regression model
+pipeline = Pipeline([('SMOTE', resampling), ('Logistic Regression', model)])
+
+# -----------------------------------------------------------
+# Using a pipeline - combining a logistic regression with a SMOTE method
+
+# Split your data X and y, into a training and a test set and fit the pipeline onto the training data
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3,random_state=0)
+
+# Fit your pipeline onto your training set and obtain predictions by fitting the model onto the test data 
+pipeline.fit(X_train, y_train) 
+predicted = pipeline.predict(X_test)
+
+# Obtain the results from the classification report and confusion matrix 
+print('Classifcation report:\n', classification_report(y_test, predicted))
+conf_mat = confusion_matrix(y_true=y_test, y_pred=predicted)
+print('Confusion matrix:\n', conf_mat)
+
+
+
+
+
+
+
  
 
 
